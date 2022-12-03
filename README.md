@@ -1,7 +1,7 @@
 - 👋 Hi, I’m @katiemboswell.
 - 👀 I’m interested in accessing unstructured business data for key insights.
-- 🌱 I’m currently learning Python, SQL, and Power BI. I'm a beginner, and I've just accepted a spot in a MS Applied Data Science program.
-- 💞️ I’m looking to collaborate on ways to mine and organize information from business APIs (UKG, Maximo) that require authentication.
+- 🌱 I’m currently learning Python, SQL, and Power BI. I've just accepted a spot in a MS Applied Data Science program.
+- 💞️ I’m looking to collaborate on ways to mine and organize information from business APIs.
 - 📫 How to reach me jcktboz@gmail.com.
 
 <!---
