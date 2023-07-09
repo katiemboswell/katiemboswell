@@ -1,8 +1,7 @@
-- 👋 Hi, I’m @katiemboswell.
-- 👀 I’m interested in accessing unstructured business data for key insights.
-- 🌱 I’m currently learning Python, SQL, and Power BI. I've just accepted a spot in a MS Applied Data Science program.
-- 💞️ I’m looking to collaborate on ways to mine and organize information from business APIs.
-- 📫 How to reach me jcktboz@gmail.com.
+- Hi, I’m @katiemboswell. I'm currently a Lead Business Systems Analyst in the Energy Industry.
+- I have a master's degree in English Literature and spent two decades in higher ed.
+- I'm currently knee-deep in a second master's program, this time in Applied Data Science.
+- Feel free to check out my projects!
 
 <!---
 katiemboswell/katiemboswell is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
