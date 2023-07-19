@@ -1,0 +1,211 @@
+---
+title: "Multiple Linear Regression Modeling Estimation"
+author: "K Boswell"
+date: "2023-07-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In this methodology, we use estimation and hypothesis testing in multiple linear regression. 
+
+# Step 1: Overall Test
+We are interested in asking the question whether BMI or Age is useful in explaining the variability of LDL cholesterol.
+LDLi = β0 + β1BMIi + β2Agei + εi
+H0 : β1 = β2 = 0
+
+**What is alternative hypothesis H1?**
+**Ha: β1 OR β2 ≠0**
+
+*Perform the test in R and interpret the results:*
+```{r}
+
+# load haven to read sas data
+library(haven)
+hersdata <- read_sas("hersdata.sas7bdat")
+
+# Load tidy to eliminate na values from selected column
+library(tidyr)    
+herstidy <- hersdata %>% drop_na(LDL, BMI, AGE)
+selected_columns <- c("LDL", "BMI", "AGE", "SMOKING", "DRINKANY", "NONWHITE")
+
+# Verify column names and na values
+selected_data <- summary(herstidy[, selected_columns])
+print(selected_data)
+
+# Fit the full multiple linear regression model
+full_model <- lm(LDL ~ BMI + AGE, data = herstidy)
+
+# Perform Overall F-test
+overall_ftest <- anova(full_model)
+print(overall_ftest)
+```
+**The results indicate that at least one of the variables is significant at the .05 alpha level (p = .0015 for BMI, p = .02 for AGE). Therefore, both variables are showing significance, not accounting for interactions. As a result, I initially reject H0 (that none of the variables are significant), and will continue to evaluate this model.**
+
+# Step 2: Tests of Individual Regression Coefficients
+
+Given the model
+E(LDLi) = β0 + β1BMIi + β2Agei
+we want to test H0 : β1 = 0 vs H1 : β1 /= 0, given that Agei is in the model. We will do it in different ways.
+
+Method 1: T-Test
+
+```{r}
+# T-test results for the individual coefficients
+t_test_result <- summary(full_model)
+print(t_test_result)
+```
+**The p-value is .0055, so we reject the null hypothesis that H0: β_1=0 and conclude that BMI is significantly associated with LDL, controlling for Age.**
+
+
+Method 2, Part 1: Partial F-Test by comparing SSR from two models: linear regression models with and without BMI.
+
+```{r}
+# STEP TWO *********************************************************************
+# Tests of individual regression coefficients
+# Questions:
+# 1. Is there an increase in the SSR, and is it enough to warrant 
+# an additional predictor in the model?
+# 2. Are we adding an unimportant predictor that increases the residual mean square
+# and therefore reduces the usefulness of the model?
+
+# Two-Model non-direct comparison:
+
+# Fitting the linear regression model with LDL regressed solely on Age
+age_model <- lm(LDL ~ AGE, data = herstidy)
+
+# Extracting the Sum of Squares Regression (SSR) for the Age model
+age_ssr <- sum((predict(age_model) - mean(herstidy$LDL))^2)
+
+# Extracting the Sum of Squares Regression (SSR) for the full model
+full_model_ssr <- sum((predict(full_model) - mean(herstidy$LDL))^2)
+
+# Creating a data frame to display the SSR values for both models
+ssr_comparison <- data.frame(
+  Model = c("Age Model", "Full Model (Age + BMI)"),
+  SSR = c(age_ssr, full_model_ssr)
+)
+
+# Printing the SSR for the Age model
+print(ssr_comparison)
+```
+
+**Our SSR in the full model is increased quite a bit, which is a good sign. The SSR helps us see how much variance in the response variable is explained with the model. Because it increases, is suggests that the predictors improve the model's performance.We now need to extract the F-statistic. **
+
+Method 2, Part 2:
+```{r}
+
+# Calculate the MSE, which represents the variance of the residuals in the full model.
+# It is calculated as the SSE/DF
+sse <- sum((residuals(full_model))^2)
+df_error <- nrow(herstidy) - length(coef(full_model)) - 1
+mse <- sse / df_error
+
+# Take the SSR values for both models
+ssr_bmi_age <- full_model_ssr
+ssr_age <- age_ssr
+
+# Calculate the F-statistic: Length(coef(full_model)) is the number of coefficients in the full model,
+# including the intercept, and Length(coef(age_model) gives the number of coefficients in the age-only model,
+# including the itnercept
+f_statistic <- ((ssr_bmi_age - ssr_age) / (length(coef(full_model)) - length(coef(age_model)))) / mse
+print(f_statistic)
+
+```
+
+**Because the F-statistic is large, it suggests that the predictors significantly improve the model's performance. We now verify with a partial F-test and extract the p-value.** 
+
+
+
+Method 3: Partial F-Test
+
+```{r}
+# Use the partial f-test to show that the full model compared to only one variable
+# is significant. 
+
+reduced_model <- lm(LDL ~ 1, data = herstidy)
+partial_f_result <- anova(reduced_model, full_model)
+print(partial_f_result)
+```
+
+**Looking at the p-value of these results, we have .00045. That is statistically significant. Given the increase in SSR, the significant F-statistic, and the p-value with significance at the .001 alpha level, we can reject the null hypothesis.**
+
+# Tests for Groups of Predictors
+
+Often, it is of interest to determine if, collectively, a group of predictors significantly contribute to the variability in Y given another group of predictors are in the model.
+
+Given the model
+
+E(LDLi)  =  β0 + β1statinsi + β2BMIi +β3statinsi × BMIi + β4Agei + β5Smokingi +β6Drinkanyi + β7Nonwhitei
+
+where there are *two* terms associated with BMI, we would like to know if BMI is significantly associated with LDL levels, given the model that this association differs by statin use?
+
+In other words, we want to test H0: β2 = β3 = 0 vs H1: at least one of β2, β3 /= 0, given other predictors are in the model. We will use several different methods.
+
+## Method for Groups of Predictors 1: SSR and F-Statistic Comparison between Models
+
+This is similar to the steps we took above, where we extracted SSR. Here, we are testing SSR extraction from the interaction model and the reduced model without any BMI.
+
+```{r}
+# Step One:
+# Fitting the full multiple linear regression model with all predictors of interest
+# Making sure to multiply BMI with statins to account for interaction
+interaction_model_bmi <- lm(LDL ~ BMI + STATINS + BMI:STATINS + AGE + SMOKING + 
+                   DRINKANY + NONWHITE, data = herstidy)
+# Fitting the reduced model without any BMI 
+model_no_bmi <- lm(LDL ~ STATINS + AGE + SMOKING + DRINKANY + NONWHITE, data = herstidy)
+
+
+# Extracting the Sum of Squares Regression (SSR) for the Interaction model
+interaction_ssr_bmi <- sum((predict(interaction_model_bmi) - mean(herstidy$LDL))^2)
+
+# Extracting the Sum of Squares Regression (SSR) for the Non-BMI model
+no_bmi_ssr <- sum((predict(model_no_bmi) - mean(herstidy$LDL))^2)
+
+# Creating a data frame to display the SSR values for both models
+group_ssr_comparison <- data.frame(
+  Model = c("Interaction Model with BMI", "No BMI Model"),
+  SSR = c(interaction_ssr_bmi, no_bmi_ssr)
+)
+print(group_ssr_comparison)
+```
+We now extract the f-statistic to further test for significance.
+
+
+**We get an increase in SSR in the interaction model. Now we need to look at the F-statistic and the p-value.**
+
+
+```{r}
+# Performing the partial F-test to compare the two models
+group_f_result <- anova(model_no_bmi, interaction_model_bmi)
+print(group_f_result)
+```
+**The p-value is .001119 and the F-statistic is 6.8118. Therefore, using this method, we reject the null hypothesis, as we have strong evidence that BMI is associated with LDL levels.**
+
+## Method for Groups of Predictors 2: Simultaneous Regression
+
+What if we want to test whether BMI is significantly associated with LDL levels for those people receiving statins?
+
+In other words, we want to test H0 : β2 + β3 = 0 vs H1: β2 + β3 /= 0, given that other predictors are in the model. Notice the differences in H0 from the above.
+
+Step 1: Partial F Comparison in R:
+
+```{r}
+# Testing BMI significance associated with LDL for those people
+# receiving statins, given other predictors are in the model
+
+herstidy$BMIMINUSINTERACTION <- herstidy$BMI - herstidy$BMI*herstidy$STATINS
+
+interaction_model_withbmistatin <- lm(LDL ~ STATINS + AGE + SMOKING + DRINKANY + NONWHITE + STATINS:BMI +
+                               BMIMINUSINTERACTION, data = herstidy)
+
+reduced_model_no_bmistatin <- lm(LDL ~ STATINS + AGE + SMOKING + DRINKANY + NONWHITE + BMIMINUSINTERACTION, data = herstidy)
+
+summary(interaction_model_withbmistatin)
+anova(interaction_model_withbmistatin, reduced_model_no_bmistatin)
+
+```
+
+**We are interested in the p-value from the simultaneous test for general linear hypothesis. The p-value is .5872, indicating no evidence that BMI is associated with LDL levels for people taking statins. I do not reject the null hypothesis.**
