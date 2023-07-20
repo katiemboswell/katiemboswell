@@ -367,15 +367,13 @@ in explaining the variability of LDL cholesterol. LDLi = β0 + β1BMIi +
 β2Agei + εi H0 : β1 = β2 = 0</p>
 <p><strong>What is alternative hypothesis H1?</strong> <strong>Ha: β1 OR
 β2 ≠0</strong></p>
-<p><em>Perform the test in R and interpret the results:</em></p>
 <pre class="r"><code># load haven to read sas data
 library(haven)
 hersdata &lt;- read_sas(&quot;hersdata.sas7bdat&quot;)
 
 # Load tidy to eliminate na values from selected column
-library(tidyr)    </code></pre>
-<pre><code>## Warning: package &#39;tidyr&#39; was built under R version 4.3.1</code></pre>
-<pre class="r"><code>herstidy &lt;- hersdata %&gt;% drop_na(LDL, BMI, AGE)
+library(tidyr)    
+herstidy &lt;- hersdata %&gt;% drop_na(LDL, BMI, AGE)
 selected_columns &lt;- c(&quot;LDL&quot;, &quot;BMI&quot;, &quot;AGE&quot;, &quot;SMOKING&quot;, &quot;DRINKANY&quot;, &quot;NONWHITE&quot;)
 
 # Verify column names and na values
@@ -412,12 +410,12 @@ print(overall_ftest)</code></pre>
 ## Residuals 2744 3903361  1422.5                    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p><strong>The results indicate that at least one of the variables is
+<p>The results indicate that at least one of the variables is
 significant at the .05 alpha level (p = .0015 for BMI, p = .02 for AGE).
 Therefore, both variables are showing significance, not accounting for
 interactions. As a result, I initially reject H0 (that none of the
 variables are significant), and will continue to evaluate this
-model.</strong></p>
+model.</p>
 </div>
 <div id="step-2-tests-of-individual-regression-coefficients" class="section level1">
 <h1>Step 2: Tests of Individual Regression Coefficients</h1>
@@ -447,9 +445,9 @@ print(t_test_result)</code></pre>
 ## Residual standard error: 37.72 on 2744 degrees of freedom
 ## Multiple R-squared:  0.005608,   Adjusted R-squared:  0.004883 
 ## F-statistic: 7.737 on 2 and 2744 DF,  p-value: 0.0004458</code></pre>
-<p><strong>The p-value is .0055, so we reject the null hypothesis that
-H0: β_1=0 and conclude that BMI is significantly associated with LDL,
-controlling for Age.</strong></p>
+<p>The p-value is .0055, so we reject the null hypothesis that H0: β_1=0
+and conclude that BMI is significantly associated with LDL, controlling
+for Age.</p>
 <p>Method 2, Part 1: Partial F-Test by comparing SSR from two models:
 linear regression models with and without BMI.</p>
 <pre class="r"><code># STEP TWO *********************************************************************
@@ -482,11 +480,11 @@ print(ssr_comparison)</code></pre>
 <pre><code>##                    Model      SSR
 ## 1              Age Model 11038.85
 ## 2 Full Model (Age + BMI) 22013.22</code></pre>
-<p><strong>Our SSR in the full model is increased quite a bit, which is
-a good sign. The SSR helps us see how much variance in the response
-variable is explained with the model. Because it increases, is suggests
-that the predictors improve the model’s performance.We now need to
-extract the F-statistic. </strong></p>
+<p>Our SSR in the full model is increased quite a bit, which is a good
+sign. The SSR helps us see how much variance in the response variable is
+explained with the model. Because it increases, is suggests that the
+predictors improve the model’s performance.We now need to extract the
+F-statistic.</p>
 <p>Method 2, Part 2:</p>
 <pre class="r"><code># Calculate the MSE, which represents the variance of the residuals in the full model.
 # It is calculated as the SSE/DF
@@ -504,12 +502,11 @@ ssr_age &lt;- age_ssr
 f_statistic &lt;- ((ssr_bmi_age - ssr_age) / (length(coef(full_model)) - length(coef(age_model)))) / mse
 print(f_statistic)</code></pre>
 <pre><code>## [1] 7.71199</code></pre>
-<p><strong>Because the F-statistic is large, it suggests that the
-predictors significantly improve the model’s performance. We now verify
-with a partial F-test and extract the p-value.</strong></p>
+<p>Because the F-statistic is large, it suggests that the predictors
+significantly improve the model’s performance. We now verify with a
+partial F-test and extract the p-value.</p>
 <p>Method 3: Partial F-Test</p>
-<pre class="r"><code># Use the partial f-test to show that the full model compared to only one variable
-# is significant. 
+<pre class="r"><code># Use the partial f-test to show that the full model compared to only one variable is significant. 
 
 reduced_model &lt;- lm(LDL ~ 1, data = herstidy)
 partial_f_result &lt;- anova(reduced_model, full_model)
@@ -523,10 +520,10 @@ print(partial_f_result)</code></pre>
 ## 2   2744 3903361  2     22013 7.7375 0.0004458 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p><strong>Looking at the p-value of these results, we have .00045. That
-is statistically significant. Given the increase in SSR, the significant
+<p>Looking at the p-value of these results, we have .00045. That is
+statistically significant. Given the increase in SSR, the significant
 F-statistic, and the p-value with significance at the .001 alpha level,
-we can reject the null hypothesis.</strong></p>
+we can reject the null hypothesis.</p>
 </div>
 <div id="tests-for-groups-of-predictors" class="section level1">
 <h1>Tests for Groups of Predictors</h1>
@@ -536,9 +533,9 @@ another group of predictors are in the model.</p>
 <p>Given the model</p>
 <p>E(LDLi) = β0 + β1statinsi + β2BMIi +β3statinsi × BMIi + β4Agei +
 β5Smokingi +β6Drinkanyi + β7Nonwhitei</p>
-<p>where there are <em>two</em> terms associated with BMI, we would like
-to know if BMI is significantly associated with LDL levels, given the
-model that this association differs by statin use?</p>
+<p>where there are two terms associated with BMI, we would like to know
+if BMI is significantly associated with LDL levels given the model that
+this association differs by statin use.</p>
 <p>In other words, we want to test H0: β2 = β3 = 0 vs H1: at least one
 of β2, β3 /= 0, given other predictors are in the model. We will use
 several different methods.</p>
@@ -573,8 +570,8 @@ print(group_ssr_comparison)</code></pre>
 ## 1 Interaction Model with BMI 216682.3
 ## 2               No BMI Model 198227.9</code></pre>
 <p>We now extract the f-statistic to further test for significance.</p>
-<p><strong>We get an increase in SSR in the interaction model. Now we
-need to look at the F-statistic and the p-value.</strong></p>
+<p>We get an increase in SSR in the interaction model. Now we need to
+look at the F-statistic and the p-value.</p>
 <pre class="r"><code># Performing the partial F-test to compare the two models
 group_f_result &lt;- anova(model_no_bmi, interaction_model_bmi)
 print(group_f_result)</code></pre>
@@ -588,17 +585,16 @@ print(group_f_result)</code></pre>
 ## 2   2737 3707501  2     18454 6.8118 0.001119 **
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p><strong>The p-value is .001119 and the F-statistic is 6.8118.
-Therefore, using this method, we reject the null hypothesis, as we have
-strong evidence that BMI is associated with LDL levels.</strong></p>
+<p>The p-value is .001119 and the F-statistic is 6.8118. Therefore,
+using this method, we reject the null hypothesis, as we have strong
+evidence that BMI is associated with LDL levels.</p>
 </div>
 <div id="method-for-groups-of-predictors-2-simultaneous-regression" class="section level2">
 <h2>Method for Groups of Predictors 2: Simultaneous Regression</h2>
-<p>What if we want to test whether BMI is significantly associated with
-LDL levels for those people receiving statins?</p>
-<p>In other words, we want to test H0 : β2 + β3 = 0 vs H1: β2 + β3 /= 0,
-given that other predictors are in the model. Notice the differences in
-H0 from the above.</p>
+<p>I we want to test whether BMI is significantly associated with LDL
+levels for those people receiving statins, we continue. In other words,
+we want to test H0 : β2 + β3 = 0 vs H1: β2 + β3 /= 0, given that other
+predictors are in the model.</p>
 <p>Step 1: Partial F Comparison in R:</p>
 <pre class="r"><code># Testing BMI significance associated with LDL for those people
 # receiving statins, given other predictors are in the model
@@ -646,10 +642,10 @@ summary(interaction_model_withbmistatin)</code></pre>
 ##   Res.Df     RSS Df Sum of Sq      F Pr(&gt;F)
 ## 1   2737 3707501                           
 ## 2   2738 3707900 -1   -399.33 0.2948 0.5872</code></pre>
-<p><strong>We are interested in the p-value from the simultaneous test
-for general linear hypothesis. The p-value is .5872, indicating no
-evidence that BMI is associated with LDL levels for people taking
-statins. I do not reject the null hypothesis.</strong></p>
+<p>We are interested in the p-value from the simultaneous test for
+general linear hypothesis. The p-value is .5872, indicating no evidence
+that BMI is associated with LDL levels for people taking statins.
+Therefore, I do not reject the null hypothesis.</p>
 </div>
 </div>
 

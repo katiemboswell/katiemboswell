@@ -379,7 +379,7 @@ were randomized to one of four groups:</p>
 1)</p></li>
 </ul>
 <p>and the amount of pulmonary inflammation, as measured by neutrophil
-numerical den- sity (Nn) in each animal was measured after three
+numerical density (Nn) in each animal was measured after three
 successive days of air pollution exposure. A large value of Nn denotes
 pulmonary inflammation.</p>
 <p>The first step is to consider the main effect model and the
@@ -400,9 +400,9 @@ with pre-existing bronchitis compared to those animals who were
 healthy.</p>
 <p>The Interaction model is: Nni = β0 + β1CAP si + β2SO2i + β3CAP si ×
 SO2i + εi, i = 1, 2, …, n</p>
-<p>Intpretation:</p>
-<p>β1: within healthy aniamls, those who were exposed to concentrated
-air particles (CAPS) are expected to have neutrophil numerical denstiry
+<p>Interpretation:</p>
+<p>β1: within healthy animals, those who were exposed to concentrated
+air particles (CAPS) are expected to have neutrophil numerical density
 (Nn) level β1 units higher than those who were not exposed to CAPS. β2:
 within animals not exposed to CAPS, those with pre-existing bronchitis
 are expected to have Nn level β2 units higher than those who were
@@ -474,7 +474,7 @@ summary(interaction_model_pollution)</code></pre>
 ## Residual standard error: 0.05308 on 271 degrees of freedom
 ## Multiple R-squared:  0.9106, Adjusted R-squared:  0.9096 
 ## F-statistic: 920.3 on 3 and 271 DF,  p-value: &lt; 2.2e-16</code></pre>
-<p>Looking at the regression coeffcients estimates for the interaction
+<p>Looking at the regression coeffecient estimates for the interaction
 model, we see that the P-value of the t test for H0: beta3 = 0 is &lt;
 0.0001. Therefore, we reject the null hypothesis and conclude that there
 is a significant difference in the effect of CAPs on Nn for healthy and
@@ -489,7 +489,7 @@ for confounding.</p>
 <p>**The regression model for CAPS exposure only is as follows: nn = B0
 + B1*caps**</p>
 <p>Confounding will be checked comparing the % of change of caps factor
-from the main effect model and simple linear model</p>
+from the main effect model and simple linear model.</p>
 <pre class="r"><code># Fit a model with caps alone
 caps_model &lt;- lm(nn ~ caps, data = pollution)
 
@@ -498,13 +498,11 @@ percent_of_change &lt;- (main_model_pollution$coefficients[2] - caps_model$coeff
 print(percent_of_change)</code></pre>
 <pre><code>##       caps 
 ## 0.04594007</code></pre>
-<p><strong>The parameter estimate for CAPS shows an increase of 4.6%, so
-it is an increase, but it does not reach the 10% level, so confounding
-is unlikely.</strong></p>
-<p>Another way to justify whether SO2 confounds the association between
-CAPs and Nn is by looking at the pairwise association among these three
-variables directly. We can use Pearson coefficient testing and build a
-matrix in R to test the correlations.</p>
+<p>The parameter estimate for CAPS shows an increase of 4.6%, so it is
+an increase, but it does not reach the 10% level, so confounding is
+unlikely. Another way to see whether SO2 confounds the association
+between CAPs and Nn is by looking at the pairwise association among
+these three variables directly.</p>
 <p>Since CAPS is categorical with values of 0 and 1 and SO2 is
 categorical variable with values of 0 and 1 as well, we use
 <strong>two-sample t test</strong> to assess the association between
@@ -543,9 +541,9 @@ test</strong> since both of them are categorical variables.</p>
 ## 
 ## data:  pollution$caps and pollution$so2
 ## X-squared = 1.899, df = 1, p-value = 0.1682</code></pre>
-<p><strong>Based on these non-significant results, SO2 is not shown to
-confound the association between CAPS and Nn. I believe that CAPS and
-SO2 are independently associated with an increase in Nn.</strong></p>
+<p>Based on these non-significant results, SO2 is not shown to confound
+the association between CAPS and Nn. I believe that CAPS and SO2 are
+independently associated with an increase in Nn.</p>
 <p>Now we begin the step of looking for interaction. Under the main
 effect model and the interaction model, we test whether there is a
 health effect of air pollution inhalation for healthy animals, and also
@@ -555,8 +553,7 @@ chronic bronchitic animals (i.e. those who received SO2).</p>
 pollution inhalation for healthy animals from that for chronic
 bronchitic animals. Thus, the null hypothesis for both scenarios is H0:
 β1 = 0.</p>
-<p><strong>Step 1: Use the main effect model to test the null hypothesis
-that H0: β1=0</strong></p>
+<p><strong>Null hypothesis: H0: β1=0</strong></p>
 <pre class="r"><code># Run T-Test on the main effect model
 main_ttest_pollution &lt;- summary(main_model_pollution)
 print(main_ttest_pollution)</code></pre>
@@ -579,23 +576,20 @@ print(main_ttest_pollution)</code></pre>
 ## Residual standard error: 0.06171 on 272 degrees of freedom
 ## Multiple R-squared:  0.8788, Adjusted R-squared:  0.8779 
 ## F-statistic: 985.8 on 2 and 272 DF,  p-value: &lt; 2.2e-16</code></pre>
-<p>Next, we perform a partial F-test under the <strong>interaction
-model</strong>. We know that health effect of air pollution inhalation
-for healthy animals is β1, and for chronic bronchitic animals is β1 + β3
-under the interaction model. Thus, The null hypothesis for whether there
+<p>Next, we perform a partial F-test under the interaction model. We
+know that health effect of air pollution inhalation for healthy animals
+is β1, and for chronic bronchitic animals is β1 + β3 under the
+interaction model. Thus, <strong>The null hypothesis for whether there
 is a health effect of air pollution inhalation for healthy animals is H0
-: β1 = 0. The null hypothesis for whether there is a health effect of
-air pollution inhalation for chronic bronchitic animals (i.e. those who
-received SO2) is H0 : β1 + β3 = 0.</p>
+: β1 = 0.</strong> <strong>The null hypothesis for whether there is a
+health effect of air pollution inhalation for chronic bronchitic animals
+(i.e. those who received SO2) is H0 : β1 + β3 = 0. </strong></p>
 <p>We use partial F test using the glht function to solve this
 problem.</p>
 <pre class="r"><code>library(multcomp)</code></pre>
-<pre><code>## Warning: package &#39;multcomp&#39; was built under R version 4.3.1</code></pre>
 <pre><code>## Loading required package: mvtnorm</code></pre>
-<pre><code>## Warning: package &#39;mvtnorm&#39; was built under R version 4.3.1</code></pre>
 <pre><code>## Loading required package: survival</code></pre>
 <pre><code>## Loading required package: TH.data</code></pre>
-<pre><code>## Warning: package &#39;TH.data&#39; was built under R version 4.3.1</code></pre>
 <pre><code>## Loading required package: MASS</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;TH.data&#39;</code></pre>
@@ -638,9 +632,9 @@ summary(interaction_model_pollution)</code></pre>
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## (Adjusted p values reported -- single-step method)</code></pre>
-<p><strong>These results indicate that the health effect of air
-pollution inhalation for chronic bronchitic animals is significant at
-the .05 alpha level. </strong></p>
+<p>These results indicate that the health effect of air pollution
+inhalation for chronic bronchitic animals is significant at the .05
+alpha level.</p>
 </div>
 </div>
 <div id="multiple-linear-regression-modeling-with-continuous-and-categorical-variables" class="section level2">
@@ -655,8 +649,8 @@ satisfaction (Y ) and patient’s age (X1, in years), severity of illness
 randomly selected 23 patients and collected the data in patsat.sas7bdat,
 where larger values of Y, X2, and X3 are, respectively, associated with
 more satisfaction, increased severity of illness and more anxiety.</p>
-<p>The regression model is Yi = β0 + β1X1i + β2X2i + β3X3i + εi,
-where:</p>
+<p><strong>The regression model is Yi = β0 + β1X1i + β2X2i + β3X3i + εi,
+where:</strong></p>
 <ul>
 <li><p><strong>β1 is the coefficient for the effect of age on patient
 satisfaction.</strong></p></li>
@@ -700,9 +694,9 @@ print(overall_ftest_patsat)</code></pre>
 ## Residual standard error: 10.29 on 19 degrees of freedom
 ## Multiple R-squared:  0.6727, Adjusted R-squared:  0.621 
 ## F-statistic: 13.01 on 3 and 19 DF,  p-value: 7.482e-05</code></pre>
-<p><strong>Conclusion: F-statistic: 13.01 on 3 and 19 DF, and p-value
-&lt;.001. The test implies that at least one of β1=β2=β3 is not equal to
-zero. I reject the null hypothesis.</strong></p>
+<p>Conclusion: F-statistic: 13.01 on 3 and 19 DF, and p-value &lt;.001.
+The test implies that at least one of β1=β2=β3 is not equal to zero. I
+reject the null hypothesis.</p>
 <p>I then ran a 95% confidence interval estimates of β1, β2, and β3.</p>
 <pre class="r"><code>conf_intervals_patsat &lt;- confint(patsat_main_model)
 conf_intervals_patsat</code></pre>
@@ -711,15 +705,14 @@ conf_intervals_patsat</code></pre>
 ## X1           -1.841264  -0.5793727
 ## X2           -2.384272   1.0524608
 ## X3          -34.234265  17.0082018</code></pre>
-<p><strong>The confidence intervals give a range of values for each
-coefficient at the 95% confidence level.</strong> <strong>They show a
-95% confidence that the true value of each coefficient is between the
-upper and lower boundary displayed. For example, for Age (X1), the lower
-boundary is -1.841 and the upper boundary is -0.579.</strong> <strong>We
-are 95% confident that the true value of X1 lies between those two
-numbers. And although X2(Illness Severity) and X3(Anxiety Level) are not
-shown to be statistically significant, the confidence interval still
-holds.</strong></p>
+<p>The confidence intervals give a range of values for each coefficient
+at the 95% confidence level. They show a 95% confidence that the true
+value of each coefficient is between the upper and lower boundary
+displayed. For example, for Age (X1), the lower boundary is -1.841 and
+the upper boundary is -0.579. We are 95% confident that the true value
+of X1 lies between those two numbers. And although X2(Illness Severity)
+and X3(Anxiety Level) are not shown to be statistically significant, the
+confidence interval still holds.</p>
 <p>The hospital administrator would like to know a 95% confidence
 interval for someone age 35, with a severity illness level of 45 and an
 anxiety level of 2.2</p>
@@ -731,11 +724,11 @@ predicted_satisfaction &lt;- predict(patsat_main_model, newdata = new_data, inte
 print(predicted_satisfaction)</code></pre>
 <pre><code>##        fit      lwr      upr
 ## 1 71.60034 62.30057 80.90012</code></pre>
-<p><strong>Based on these results, we can be 95% confident that the true
-mean satisfaction for someone age 35, with an Illness Severity level of
-45, and a Anxiety Level of 2.2 will fall between 62.30057 and 80.900012.
-The point estimate of the mean satisfaction for this combination of
-variables is 71.60034.</strong></p>
+<p>Based on these results, we can be 95% confident that the true mean
+satisfaction for someone age 35, with an Illness Severity level of 45,
+and a Anxiety Level of 2.2 will fall between 62.30057 and 80.900012. The
+point estimate of the mean satisfaction for this combination of
+variables is 71.60034.</p>
 </div>
 </div>
 
